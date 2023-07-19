@@ -4,20 +4,15 @@ import session from 'cookie-session';
 import crypto from 'crypto';
 import cookieParser from 'cookie-parser';
 import fs from 'fs';
+import mysql from 'mysql';
 
 
 const app = express();
 app.use(cookieParser());
-const port = 8005;
-const publicPath = path.resolve('static-path');
-
-app.use(express.static(publicPath));
+app.use(express.static(path.resolve('static-path')));
 app.set('view engine', 'ejs');
-
 import bodyParser from 'body-parser';
 app.use(bodyParser.urlencoded({ extended: true }));
-
-import mysql from 'mysql';
 // MySQL Connection
 const pool = mysql.createPool({
     host: 'localhost',
@@ -32,10 +27,10 @@ const pool = mysql.createPool({
         return (useDefaultTypeCasting());
     }
 });
-
-// Middleware connection
+// crypto for middleware
 const key1 = crypto.randomBytes(32).toString('hex');
 const key2 = crypto.randomBytes(32).toString('hex');
+// Middleware connection
 app.use(
     session({
         name: 'session',
@@ -53,11 +48,8 @@ app.use(
         },
     })
 );
-
 // Multer : untuk upload / export file :
-// Multer configuration
 import multer from 'multer';
-// Set storage configuration for multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'tes'); // Specify the destination directory
@@ -71,195 +63,27 @@ const storage = multer.diskStorage({
 // Create multer instance with the storage configuration
 // const upload = multer({ storage: storage });
 
-app.listen(port, () => {
+// initialize app on port 8005
+app.listen(8005, () => {
     console.log('App started');
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server running on http://localhost:${8005}`);
 });
 
-function validateLoginStatus(req) {
-    const isAdmin = Number(req.cookies.is_admin);
-    if (!req.cookies.username) {
-        return 'anon';
-    }
-    else {
-        if (isAdmin === 1) {
-            return 'admin';
-        }
-        else {
-            return 'user';
-        }
-    }
-}
-function returnUsername(req) {
-    // console.log(req.cookies)
-    return req.cookies.username;
-}
-
-async function fetchBrandBagList() {
-    try {
-        const query = `
-            SELECT merk.Nama_Merk AS brand, COUNT(*) AS count
-            FROM tas t INNER JOIN merk ON t.Id_Merk = merk.Id_Merk
-            GROUP BY merk.Nama_Merk
-            ORDER BY count DESC;
-        `;
-
-        const results = await queryAsync(query);
-
-        const brands = results.map((row) => row.brand);
-        const bagCounts = results.map((row) => row.count);
-
-        const topTenByCategory = await fetchTopTenBagsByCategory();
-        const topTenBySubcategory = await fetchTopTenBagsBySubcategory();
-
-        return {
-            brands,
-            bagCounts,
-            topTenByCategory,
-            topTenBySubcategory,
-        };
-    } catch (error) {
-        throw error;
-    }
-}
-
-function fetchTotalBags() {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT COUNT(*) AS TotalBags FROM tas';
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(results[0].TotalBags);
-        });
-    })
-}
-
-function fetchTotalCategories() {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT COUNT(Id_Kategori) AS TotalCategories FROM kategori';
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(results[0].TotalCategories);
-        });
-    })
-}
-
-function fetchTotalDesigners() {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT COUNT(*) AS TotalDesigners FROM designer';
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(results[0].TotalDesigners);
-        });
-    })
-}
-
-function fetchTotalReviews() {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT COUNT(*) AS TotalReviews FROM review';
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(results[0].TotalReviews);
-        });
-    })
-}
-
-function fetchAverageReviewValue() {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT AVG(Bintang) AS AverageReviewValue FROM review';
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(results[0].AverageReviewValue);
-        });
-    })
-}
-
-function fetchLowestRating() {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT MIN(Bintang) AS LowestRating FROM review';
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(results[0].LowestRating);
-        });
-    })
-}
-
-function fetchTotalSubcategories() {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT COUNT(*) AS TotalSubcategories FROM sub_kategori';
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(results[0].TotalSubcategories);
-        });
-    })
-}
-
-function fetchTotalAccounts() {
-    return new Promise((resolve, reject) => {
-        const query = 'SELECT COUNT(Id_Account) AS TotalAccounts FROM account';
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-            resolve(results[0].TotalAccounts);
-        });
-    })
-}
-
-function fetchFollowerCount() {
-    return new Promise((resolve, reject) => {
-        pool.query(
-            'SELECT a.Username, COUNT(f.Id_Follower) AS FollowerCount FROM follow AS f INNER JOIN account AS a ON f.Id_Account = a.Id_Account GROUP BY f.Id_Account, a.Username',
-            (error, results) => {
-                if (error) {
-                    console.error(error);
-                    reject(error);
-                    return;
-                }
-                const usernames = results.map((row) => row.Username);
-                const followerCounts = results.map((row) => row.FollowerCount);
-                resolve({ usernames, followerCounts });
-            }
-        );
-    })
-}
+import { validateLoginStatus, returnUsername } from './validate-account.js';
+import {
+    fetchBrandBagList,
+    fetchTotalBags,
+    fetchTotalCategories,
+    fetchTotalDesigners,
+    fetchTotalReviews,
+    fetchAverageReviewValue,
+    fetchLowestRating,
+    fetchTotalSubcategories,
+    fetchTotalAccounts,
+    fetchFollowerCount,
+    fetchTopTenBagsByCategory,
+    fetchTopTenBagsBySubcategory
+} from './fetch-statistics.js';
 
 app.get('/', async (req, res) => {
     try {
@@ -285,76 +109,6 @@ app.get('/', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-
-function queryAsync(query) {
-    return new Promise((resolve, reject) => {
-        pool.query(query, (error, results) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve(results);
-            }
-        });
-    });
-}
-
-async function fetchTopTenBagsByCategory() {
-    try {
-        const query = `
-            SELECT k.Nama_Kategori AS category, COUNT(r.Id_Review) AS count, AVG(r.Bintang) AS average_rating, SUM(r.Bintang) AS total_rating
-            FROM review r
-            INNER JOIN tas t ON r.Id_Tas = t.Id_Tas
-            INNER JOIN sub_kategori s ON t.Id_Subkategori = s.Id_Subkategori
-            INNER JOIN kategori k ON s.Id_Kategori = k.Id_Kategori
-            GROUP BY k.Nama_Kategori
-            ORDER BY total_rating DESC, count DESC
-            LIMIT 10;
-        `;
-
-        const results = await queryAsync(query);
-
-        const names = results.map((row) => row.category);
-        const counts = results.map((row) => row.count);
-        const ratings = results.map((row) => row.average_rating);
-
-        return {
-            names,
-            counts,
-            ratings,
-        };
-    } catch (error) {
-        throw error;
-    }
-}
-async function fetchTopTenBagsBySubcategory() {
-    try {
-        const query = `
-            SELECT s.Nama_Subkategori AS subcategory, COUNT(r.Id_Review) AS count, AVG(r.Bintang) AS average_rating, SUM(r.Bintang) AS total_rating
-            FROM review r
-            INNER JOIN tas t ON r.Id_Tas = t.Id_Tas
-            INNER JOIN sub_kategori s ON t.Id_Subkategori = s.Id_Subkategori
-            GROUP BY s.Nama_Subkategori
-            ORDER BY total_rating DESC, count DESC
-            LIMIT 10;
-        `;
-
-        const results = await queryAsync(query);
-
-        const names = results.map((row) => row.subcategory);
-        const counts = results.map((row) => row.count);
-        const ratings = results.map((row) => row.average_rating);
-
-        return {
-            names,
-            counts,
-            ratings,
-        };
-    } catch (error) {
-        throw error;
-    }
-}
-
-
 
 app.get('/profile/self/follower', (req, res) => {
     const followerQuery = "SELECT a.`Username`,a.`Id_Account` FROM `follow` AS f INNER JOIN `account` AS a ON f.`Id_Follower` = a.`Id_Account` WHERE f.`Id_Account` = ?";
@@ -483,7 +237,6 @@ app.get('/profile', (req, res) => {
         }
     });
 });
-
 
 app.get('/profile/edit', (req, res) => {
     res.render('components/accountMenu/editProfile', {
@@ -731,8 +484,6 @@ AND merk.Nama_Merk LIKE ?`;
     }
 });
 
-
-
 app.get('/searchresults', (req, res) => {
     console.log(req.query.search);
     const bagSearchQuery =
@@ -760,6 +511,7 @@ app.get('/addReview', (req, res) => {
         username: returnUsername(req),
     });
 });
+
 app.post('/addReview', (req, res) => {
     console.log(req.body);
     const addReviewQuery = `
@@ -796,34 +548,7 @@ async function fetchRecentBags() {
     return result;
 }
 
-// display recently added bag review
-function fetchRecentlyAddedData() {
-    return new Promise((resolve, reject) => {
-        const query = `
-        SELECT tas.Id_Tas, tas.namaTas, tas.Foto, account.Username, merk.Nama_Merk, designer.Nama_Designer
-        FROM tas
-        INNER JOIN review ON tas.Id_Tas = review.Id_Tas
-        INNER JOIN account ON review.Id_Account = account.Id_Account
-        INNER JOIN merk ON merk.Id_Merk = tas.Id_Merk
-        INNER JOIN designer ON designer.Id_Designer = tas.Id_Designer
-        ORDER BY review.Tanggal_Review DESC
-        LIMIT 3
-      `;
-
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
-
-            resolve(results);
-        });
-    });
-}
-
-
-
+import fetchRecentlyAddedData from './dashboard-data.js';
 app.get('/adminDashboard', async (req, res) => {
     try {
         const data = {};
@@ -872,8 +597,6 @@ app.get('/adminDashboard', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-
-
 
 // Error message tidak diisi dulu (kosong)
 app.get('/signup', (req, res) => {
@@ -1154,7 +877,6 @@ app.get('/exportTable', (req, res) => {
     SELECT Id_Tas, namaTas, Deskripsi, Warna, Dimensi, Id_Merk, Id_Designer, Id_Subkategori
     FROM tas
   `;
-
     pool.query(query, (error, results) => {
         if (error) {
             console.error(error);
@@ -1248,6 +970,7 @@ app.get('/bag/:number', (req, res) => {
         });
     }
 })
+
 app.get('/reviewSearch/:search', (req, res) => {
     getSearchRev();
     async function getSearchRev() {
