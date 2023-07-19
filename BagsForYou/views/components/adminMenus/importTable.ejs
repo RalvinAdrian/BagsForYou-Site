@@ -2,9 +2,9 @@
     <h1>Import Table</h1>
     <h3>Upload / export bags data</h3>
 
-    <form action="/importTable" method="post" enctype="multipart/form-data" class="admin-form-menu">
+    <form action="/exportTable" method="get" enctype="multipart/form-data" class="admin-form-menu">
         <label for="bagsData">Insert bag data here:</label>
-        <button type="submit" id="exportFileButton">Export bagsData</button>
+        <button id="exportFileButton">Export</button>
         <input type="file" name="bagsData" id="importTable">
         <input type="submit" value="Upload File" id="uploadFileButton">
     </form>

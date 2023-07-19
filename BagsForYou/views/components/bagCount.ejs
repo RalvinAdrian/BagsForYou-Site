@@ -1,0 +1,63 @@
+<div class="stats-row">
+    <div class="stat-graph">
+        <canvas id="categoryChart"></canvas>
+    </div>
+    <div class="stat-graph">
+        <canvas id="subcategoryChart"></canvas>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const categoryCtx = document.getElementById('categoryChart');
+        const subcategoryCtx = document.getElementById('subcategoryChart');
+
+        const brands = JSON.parse('<%- JSON.stringify(brands) %>');
+        const bagCounts = JSON.parse('<%- JSON.stringify(bagCounts) %>');
+        const topTenByCategory = JSON.parse('<%- JSON.stringify(topTenByCategory) %>');
+        const topTenBySubcategory = JSON.parse('<%- JSON.stringify(topTenBySubcategory) %>');
+
+        // Category Chart
+        new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: topTenByCategory.names,
+                datasets: [{
+                    label: 'Top Ten Categories',
+                    data: topTenByCategory.counts,
+                    borderWidth: 1,
+                    backgroundColor: '#c1d6e6',
+                }],
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+
+        // Subcategory Chart
+        new Chart(subcategoryCtx, {
+            type: 'bar',
+            data: {
+                labels: topTenBySubcategory.names,
+                datasets: [{
+                    label: 'Top Ten Subcategories',
+                    data: topTenBySubcategory.counts,
+                    borderWidth: 1,
+                    backgroundColor: '#c1d6e6',
+                }],
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+    });
+</script>

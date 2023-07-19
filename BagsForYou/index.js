@@ -1,10 +1,9 @@
-import express, { response } from 'express';
-import path, { resolve } from 'path';
+import express from 'express';
+import path from 'path';
 import session from 'cookie-session';
 import crypto from 'crypto';
 import cookieParser from 'cookie-parser';
 import fs from 'fs';
-import csv from 'csv-parser';
 
 
 const app = express();
@@ -96,28 +95,32 @@ function returnUsername(req) {
     return req.cookies.username;
 }
 
-function fetchBrandBagList() {
-    return new Promise((resolve, reject) => {
+async function fetchBrandBagList() {
+    try {
         const query = `
-        SELECT merk.Nama_Merk AS Merk, COUNT(tas.Id_Tas) AS 'Jumlah Tas'
-        FROM merk
-        LEFT JOIN tas ON tas.Id_Merk = merk.Id_Merk
-        GROUP BY merk.Id_Merk, merk.Nama_Merk
-        HAVING COUNT(tas.Id_Tas) > 0
-    `;
+            SELECT merk.Nama_Merk AS brand, COUNT(*) AS count
+            FROM tas t INNER JOIN merk ON t.Id_Merk = merk.Id_Merk
+            GROUP BY merk.Nama_Merk
+            ORDER BY count DESC;
+        `;
 
-        pool.query(query, (error, results) => {
-            if (error) {
-                console.error(error);
-                reject(error);
-                return;
-            }
+        const results = await queryAsync(query);
 
-            const brands = results.map((row) => row.Merk);
-            const bagCounts = results.map((row) => row['Jumlah Tas']);
-            resolve({ brands, bagCounts });
-        });
-    })
+        const brands = results.map((row) => row.brand);
+        const bagCounts = results.map((row) => row.count);
+
+        const topTenByCategory = await fetchTopTenBagsByCategory();
+        const topTenBySubcategory = await fetchTopTenBagsBySubcategory();
+
+        return {
+            brands,
+            bagCounts,
+            topTenByCategory,
+            topTenBySubcategory,
+        };
+    } catch (error) {
+        throw error;
+    }
 }
 
 function fetchTotalBags() {
@@ -267,11 +270,15 @@ app.get('/', async (req, res) => {
         data.totalCategories = totalCategories;
         const totalSubcategories = await fetchTotalSubcategories();
         data.totalSubcategories = totalSubcategories;
-
+        const data10 = await fetchBrandBagList();
         res.render('home', {
             data: data, // Pass the data object
             status: validateLoginStatus(req),
             username: returnUsername(req),
+            brands: data10.brands,
+            bagCounts: data10.bagCounts,
+            topTenByCategory: data10.topTenByCategory,
+            topTenBySubcategory: data10.topTenBySubcategory
         });
     } catch (error) {
         console.error(error);
@@ -279,6 +286,73 @@ app.get('/', async (req, res) => {
     }
 });
 
+function queryAsync(query) {
+    return new Promise((resolve, reject) => {
+        pool.query(query, (error, results) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+}
+
+async function fetchTopTenBagsByCategory() {
+    try {
+        const query = `
+            SELECT k.Nama_Kategori AS category, COUNT(r.Id_Review) AS count, AVG(r.Bintang) AS average_rating, SUM(r.Bintang) AS total_rating
+            FROM review r
+            INNER JOIN tas t ON r.Id_Tas = t.Id_Tas
+            INNER JOIN sub_kategori s ON t.Id_Subkategori = s.Id_Subkategori
+            INNER JOIN kategori k ON s.Id_Kategori = k.Id_Kategori
+            GROUP BY k.Nama_Kategori
+            ORDER BY total_rating DESC, count DESC
+            LIMIT 10;
+        `;
+
+        const results = await queryAsync(query);
+
+        const names = results.map((row) => row.category);
+        const counts = results.map((row) => row.count);
+        const ratings = results.map((row) => row.average_rating);
+
+        return {
+            names,
+            counts,
+            ratings,
+        };
+    } catch (error) {
+        throw error;
+    }
+}
+async function fetchTopTenBagsBySubcategory() {
+    try {
+        const query = `
+            SELECT s.Nama_Subkategori AS subcategory, COUNT(r.Id_Review) AS count, AVG(r.Bintang) AS average_rating, SUM(r.Bintang) AS total_rating
+            FROM review r
+            INNER JOIN tas t ON r.Id_Tas = t.Id_Tas
+            INNER JOIN sub_kategori s ON t.Id_Subkategori = s.Id_Subkategori
+            GROUP BY s.Nama_Subkategori
+            ORDER BY total_rating DESC, count DESC
+            LIMIT 10;
+        `;
+
+        const results = await queryAsync(query);
+
+        const names = results.map((row) => row.subcategory);
+        const counts = results.map((row) => row.count);
+        const ratings = results.map((row) => row.average_rating);
+
+        return {
+            names,
+            counts,
+            ratings,
+        };
+    } catch (error) {
+        throw error;
+    }
+}
 
 
 
@@ -312,8 +386,6 @@ app.get('/profile/self/follower', (req, res) => {
             });
         }
     });
-
-
 });
 
 app.get('/profile/self/following', (req, res) => {
@@ -1051,32 +1123,33 @@ app.post('/addCategory', (req, res) => {
 // TODO IMPORT TABLE, EXPORT TABLE IS WORKING!
 const upload = multer({ dest: 'uploads/' }); // Specify the folder where uploaded files will be stored
 
-app.post('/importTable', upload.single('bagsData'), (req, res) => {
-    const filePath = req.file.path;
+// app.post('/importTable', upload.single('bagsData'), (req, res) => {
+//     // const filePath = req.file.path;
 
-    fs.createReadStream(filePath)
-        .pipe(csv())
-        .on('data', (row) => {
-            // Rest of the code remains the same
-        })
-        .on('end', () => {
-            fs.unlink(filePath, (error) => {
-                if (error) {
-                    console.error(error);
-                }
-            });
-            res.send(`
-            <script>
-                alert('Import successful');
-                window.location.href = '/adminDashboard';
-            </script>
-            `);
-        });
-});
+//     fs.createReadStream(filePath)
+//         .pipe(csv())
+//         .on('data', (row) => {
+//             // Rest of the code remains the same
+//         })
+//         .on('end', () => {
+//             fs.unlink(filePath, (error) => {
+//                 if (error) {
+//                     console.error(error);
+//                 }
+//             });
+//             res.send(`
+//             <script>
+//                 alert('Import successful');
+//                 window.location.href = '/adminDashboard';
+//             </script>
+//             `);
+//         });
+// });
 
 
 // Export the "tas" table as CSV
 app.get('/exportTable', (req, res) => {
+    console.log(path);
     const query = `
     SELECT Id_Tas, namaTas, Deskripsi, Warna, Dimensi, Id_Merk, Id_Designer, Id_Subkategori
     FROM tas

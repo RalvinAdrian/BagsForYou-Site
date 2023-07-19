@@ -4,6 +4,10 @@
 /* #edit-profile-container {
   border: 2px solid rgb(255, 3, 3);
 } */
+#profile-main {
+  height: 82vh;
+}
+
 .profile-container,
 .profile-container-account {
   max-width: 600px;

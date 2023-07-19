@@ -40,21 +40,22 @@
                                                     <%for(let i=0;i<5;i++){%>
                                                         <%if(displayStar>0){%>
                                                             <%displayStar--;%>
-                                                            <svg id="star3" xmlns="http://www.w3.org/2000/svg" height="24"
-                                                                viewBox="0 -960 960 960" width="24" fill="#ffd400"
-                                                                stroke="black">
-                                                                <path
-                                                                    d="m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z" />
-                                                            </svg>
-                                                        <%}else{%>
-                                                            <svg id="star4" xmlns="http://www.w3.org/2000/svg" height="24"
-                                                                viewBox="0 -960 960 960" width="24" stroke="black">
-                                                                <path
-                                                                    d="m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z" />
-                                                            </svg>
-                                                        <%}%>
-                                                    <%}%>
-                                                    <%=average%>
+                                                                <svg id="star3" xmlns="http://www.w3.org/2000/svg"
+                                                                    height="24" viewBox="0 -960 960 960" width="24"
+                                                                    fill="#ffd400" stroke="black">
+                                                                    <path
+                                                                        d="m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z" />
+                                                                </svg>
+                                                                <%}else{%>
+                                                                    <svg id="star4" xmlns="http://www.w3.org/2000/svg"
+                                                                        height="24" viewBox="0 -960 960 960" width="24"
+                                                                        stroke="black">
+                                                                        <path
+                                                                            d="m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z" />
+                                                                    </svg>
+                                                                    <%}%>
+                                                                        <%}%>
+                                                                            <%=average%>
                                                 </div>
                                             </div>
                                         </div>
@@ -83,34 +84,37 @@
                                                             <%=review.Username%>
                                                         </p>
                                                         <a href="/profile/<%=review.Id_Account%>" style="all: unset;">
-                                                        <button class="reviewProfileButton">Profile</button>
+                                                            <button class="reviewProfileButton">Profile</button>
                                                         </a>
                                                     </div>
                                                     <%for(let i=0;i<5;i++){%>
                                                         <%if(review.Bintang>i){%>
-                                                            <svg id="star3" xmlns="http://www.w3.org/2000/svg" height="24"
-                                                                viewBox="0 -960 960 960" width="24" fill="#ffd400"
-                                                                stroke="black">
+                                                            <svg id="star3" xmlns="http://www.w3.org/2000/svg"
+                                                                height="24" viewBox="0 -960 960 960" width="24"
+                                                                fill="#ffd400" stroke="black">
                                                                 <path
                                                                     d="m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z" />
                                                             </svg>
-                                                        <%}else{%>
-                                                            <svg id="star4" xmlns="http://www.w3.org/2000/svg" height="24"
-                                                                viewBox="0 -960 960 960" width="24" stroke="black">
-                                                                <path
-                                                                    d="m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z" />
-                                                            </svg>
-                                                        <%}%>
-                                                    <%}%>
-                                                    <p class="review-text">
-                                                        <%=review.Isi_Review%>
-                                                    </p>
-                                                    <br>
+                                                            <%}else{%>
+                                                                <svg id="star4" xmlns="http://www.w3.org/2000/svg"
+                                                                    height="24" viewBox="0 -960 960 960" width="24"
+                                                                    stroke="black">
+                                                                    <path
+                                                                        d="m233-80 65-281L80-550l288-25 112-265 112 265 288 25-218 189 65 281-247-149L233-80Z" />
+                                                                </svg>
+                                                                <%}%>
+                                                                    <%}%>
+                                                                        <p class="review-text">
+                                                                            <%=review.Isi_Review%>
+                                                                        </p>
+                                                                        <br>
                                                 </div>
                                                 <%}%>
                                         </div>
                                     </div>
                                 </div>
+
+                                <%- include('../navigation/footer') %>
 </body>
 
 </html>
