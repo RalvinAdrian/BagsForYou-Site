@@ -78,7 +78,7 @@ header {
   background-color: white;
   padding: 0.6rem 4rem;
   /* margin-bottom: 0.4rem; */
-  z-index: 1;
+  z-index: 15;
 }
 .brandName {
   /* 24px */
@@ -185,11 +185,11 @@ header {
 /*  */
 
 footer {
-  position: absolute;
+  /* position: absolute; */
   grid-template-columns: 20vw 80vw;
   grid-template-rows: max-content;
   padding: 1rem;
-  margin-top: 1rem;
+  /* margin-top: 1rem; */
   bottom: 0;
   width: 100%;
   background-color: #191919;
@@ -220,8 +220,6 @@ footer .container {
 section.hero::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(
@@ -235,7 +233,7 @@ section.hero::before {
 section.hero {
   min-height: 81vh;
   background-image: url('/img-placeholder/bg-hero.png');
-  background-size: 100%;
+  background-size: 110%;
   z-index: 1;
   flex-direction: column;
 }
@@ -246,7 +244,7 @@ section.hero {
 
 .searchbar-container {
   display: flex;
-  margin-top: 7rem;
+  margin-top: 2rem;
   justify-content: center;
   max-width: 60ch;
 }
@@ -436,7 +434,7 @@ section.hero {
 }
 
 .stats {
-  background-color: rgba(255, 255, 255, 0.589);
+  background-color: rgba(0, 0, 0, 0.589);
   margin-top: 1rem;
   border: 2px solid black;
   border-radius: 3px;
@@ -452,6 +450,10 @@ section.hero {
 
 .stats:first-child {
   margin-top: 1rem;
+  /* color: white; */
+}
+#stat-title {
+  color: white;
 }
 
 .stats-row {
@@ -470,12 +472,19 @@ section.hero {
 }
 
 /* border-radius = padding + 1 */
-.stat-items {
+.stat-items,
+.stat-graph {
   background-color: rgb(195, 255, 222);
   border: 3px solid black;
   line-height: 1.2;
   border-radius: 0.6rem;
   padding: 0 1rem;
+  max-width: 250px;
+  /* max-height: 400px; */
+}
+
+.stat-graph {
+  max-width: fit-content;
 }
 
 .stat-items h2 {
@@ -495,6 +504,11 @@ section.hero {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#searchForReviewResults {
+  overflow-y: scroll;
+  height: 60vh;
 }
 
 .container-all {
@@ -555,7 +569,7 @@ section.hero {
   background-color: rgb(206, 206, 218);
 }
 .reviewUser {
-  max-height: 86vh;
+  height: 86vh;
   overflow-y: scroll;
 }
 

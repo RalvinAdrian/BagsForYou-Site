@@ -4,7 +4,7 @@
   "description": "App tugas besar MIBD-PBW",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon backend/index.js"
   },
   "author": "Ralvin-Adrian",
   "license": "ISC",

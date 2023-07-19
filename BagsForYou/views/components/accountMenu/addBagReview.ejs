@@ -98,15 +98,12 @@
                                             document.querySelector('form').submit();
                                             alert("Review sudah berhasil ditambahkan");
                                         }
-
                                     })
-
                                     searchButton.addEventListener('click', async () => {
                                         resultContainer.classList.remove('hidden');
                                         formReviewContainer.classList.add('hidden');
 
                                         try {
-
                                             const searchParam = !searchText.value ? 'none' : searchText.value
                                             console.log(searchParam);
                                             const response = await fetch('reviewSearch/' + searchParam);
@@ -144,19 +141,13 @@
                                                     e.preventDefault();
                                                     searchForReviewResults.classList.add('hidden');
                                                     formReviewContainer.classList.remove('hidden');
-
                                                     formReviewContainer.querySelector('#bag-name').value = link.getAttribute('data-bag-name');
                                                 });
                                             });
-                                        } catch {
-
+                                        } catch { // catch nothing..
                                         }
                                     })
-
-
-
                                     const cancelReviewButton = document.querySelector('#cancelReview');
-
                                     cancelReviewButton.addEventListener('click', () => {
                                         searchForReviewResults.classList.remove('hidden');
                                         formReviewContainer.classList.add('hidden');
